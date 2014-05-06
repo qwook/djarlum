@@ -1,10 +1,18 @@
 # command -v entr > /dev/null 2>&1 || { brew install entr; }
 
-all: lua/main.lua.json
-
-lua/main.lua.json:
+all:
 	cd lua; \
 	moonshine distil *.lua
+
+watch:
+	cd lua; \
+	find . -name '*.lua' | entr moonshine distil *.lua
+
+coffee:
+	coffee --output js -j love.js --compile coffeescript/love.js/
+	coffee --output js --compile coffeescript/amore.coffee
+
+lua/main.lua.json:
 
 clean:
 	rm lua/*.json
