@@ -19,8 +19,6 @@ canvas:setFilter('nearest', 'nearest')
 local scrW = love.graphics.getWidth()
 local scrH = love.graphics.getHeight()
 
-print(scrW, scrH)
-
 -- heh
 function drawString(str, offsetX, offsetY)
     local y = 0
