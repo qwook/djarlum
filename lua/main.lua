@@ -11,7 +11,7 @@ local logo = [[
 
 -- this isn't my best code... at all
 
-local enemies = require("enemies")
+local enemies = require("lua.enemies")
 
 local canvas = love.graphics.newCanvas(32, 32)
 canvas:setFilter('nearest', 'nearest')
@@ -19,6 +19,7 @@ canvas:setFilter('nearest', 'nearest')
 local scrW = love.graphics.getWidth()
 local scrH = love.graphics.getHeight()
 
+print(scrW, scrH)
 
 -- heh
 function drawString(str, offsetX, offsetY)
