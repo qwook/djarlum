@@ -12,6 +12,7 @@ local logo = [[
 -- this isn't my best code... at all
 
 local enemies = require("lua.enemies")
+local font = require("lua.font")
 
 local canvas = love.graphics.newCanvas(32, 32)
 canvas:setFilter('nearest', 'nearest')
@@ -32,6 +33,14 @@ function drawString(str, offsetX, offsetY)
             end
             y = y + 1
         end)
+end
+
+function printString(str, x, y)
+    for i = 1, str:len() do
+        local char = str:sub(i, i)
+        local id = tonumber(char)
+        drawString(font[id], x + (i-1) * 4, y)
+    end
 end
 
 local ticks = 0
@@ -209,6 +218,9 @@ function draw()
 
             love.graphics.setColor(255, 255, 255, 100)
             -- drawEnemy(enemies[3])
+
+            love.graphics.setColor(255, 255, 255)
+            printString("185820", 1, 1)
         end
 
     love.graphics.setCanvas()
