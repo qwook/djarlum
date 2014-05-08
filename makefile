@@ -12,7 +12,8 @@ coffee:
 	coffee --output js -j love.js --compile coffeescript/love.js/
 	coffee --output js --compile coffeescript/amore.coffee
 
-lua/main.lua.json:
+web:
+	python -m SimpleHTTPServer
 
 clean:
 	rm lua/*.json
