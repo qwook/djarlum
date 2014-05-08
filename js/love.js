@@ -151,10 +151,10 @@
       this.g = g;
       this.b = b;
       this.a = a != null ? a : 255;
-      this.r = Math.floor(this.r);
-      this.g = Math.floor(this.g);
-      this.b = Math.floor(this.b);
-      this.html_code = "rgb(" + this.r + ", " + this.g + ", " + this.b + ")";
+      r = Math.floor(this.r % 256);
+      g = Math.floor(this.g % 256);
+      b = Math.floor(this.b % 256);
+      this.html_code = "rgb(" + r + ", " + g + ", " + b + ")";
     }
 
     return Color;

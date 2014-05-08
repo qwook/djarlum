@@ -1,6 +1,8 @@
 class Color
   constructor: (@r, @g, @b, @a = 255) ->
-    @r = Math.floor(@r)
-    @g = Math.floor(@g)
-    @b = Math.floor(@b)
-    @html_code = "rgb(#{@r}, #{@g}, #{@b})"
+    # console.log(@r, @g, @b)
+    r = Math.floor(@r % 256)
+    g = Math.floor(@g % 256)
+    b = Math.floor(@b % 256)
+    # a = Math.floor(@a % 255) / 255
+    @html_code = "rgb(#{r}, #{g}, #{b})"
