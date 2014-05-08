@@ -384,11 +384,14 @@ function tick()
 
         -- clean up dead bullets
         local i = 1
-        while (i < #playerBullets) do
-            if (playerBullets[i] == deadBullets[1]) then
-                table.remove(playerBullets, i)
-                table.remove(deadBullets, 1)
-                i = i - 1
+        while (i <= #playerBullets) do
+            for k, deadBullet in pairs(deadBullets) do
+                if (playerBullets[i] == deadBullet) then
+                    table.remove(playerBullets, i)
+                    table.remove(deadBullets, k)
+                    i = i - 1
+                    break
+                end
             end
             i = i + 1
         end
@@ -408,11 +411,14 @@ function tick()
 
         -- clean up dead enemies
         local i = 1
-        while (i < #enemyList) do
-            if (enemyList[i] == deadEnemies[1]) then
-                table.remove(enemyList, i)
-                table.remove(deadEnemies, 1)
-                i = i - 1
+        while (i <= #enemyList) do
+            for k, deadEnemy in pairs(deadEnemies) do
+                if (enemyList[i] == deadEnemy) then
+                    table.remove(enemyList, i)
+                    table.remove(deadEnemies, k)
+                    i = i - 1
+                    break
+                end
             end
             i = i + 1
         end
