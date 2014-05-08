@@ -231,7 +231,7 @@ local time = 0
 function love.update(dt)
     time = time + dt
     if time > rate then
-        for i = 1, math.floor(time / rate) do
+        for i = 1, math.min(math.floor(time / rate), 5) do
             tick()
         end
         time = time - (math.floor(time / rate) * rate)
@@ -383,15 +383,16 @@ function tick()
         end
 
         -- clean up dead bullets
-        local i = 0
-        while (deadBullets[1] ~= nil and playerBullets[i] ~= deadBullets[1]) do
-            i = i + 1
+        local i = 1
+        while (i < #playerBullets) do
             if (playerBullets[i] == deadBullets[1]) then
                 table.remove(playerBullets, i)
                 table.remove(deadBullets, 1)
                 i = i - 1
             end
+            i = i + 1
         end
+
 
         -- manage enemies
         local deadEnemies = {}
@@ -406,14 +407,14 @@ function tick()
         end
 
         -- clean up dead enemies
-        local i = 0
-        while (deadEnemies[1] ~= nil and enemyList[i] ~= deadEnemies[1]) do
-            i = i + 1
+        local i = 1
+        while (i < #enemyList) do
             if (enemyList[i] == deadEnemies[1]) then
                 table.remove(enemyList, i)
                 table.remove(deadEnemies, 1)
                 i = i - 1
             end
+            i = i + 1
         end
 
         -- fucking sparkles
