@@ -72,6 +72,9 @@ local enemySpawned = 0
 local nextEnemyReload = 0
 local enemyType = 0
 
+local deadEnemies = {}
+local deadBullets = {}
+
 -- menu state stuff
 local menuTransition = 0
 
@@ -365,7 +368,6 @@ function tick()
         end
 
         -- manage bullets
-        local deadBullets = {}
         for k, v in pairs(playerBullets) do
             v.y = v.y - 1
 
@@ -398,7 +400,6 @@ function tick()
 
 
         -- manage enemies
-        local deadEnemies = {}
         for k, v in pairs(enemyList) do
             local speed = v.fn(0, 1)
             v.y = v.y + speed
