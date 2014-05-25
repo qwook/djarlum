@@ -80,6 +80,10 @@ local deadBullets = {}
 -- menu state stuff
 local menuTransition = 0
 
+function playerPos()
+    return playerX, playerY
+end
+
 function initialize()
     math.randomseed(os.time())
     starDust = {}
@@ -119,6 +123,7 @@ end
 
 function love.load()
     initialize()
+    startGame()
 end
 
 function love.draw()
@@ -354,21 +359,26 @@ function tick()
             end
         end
 
-        -- spawn enemies
-        if enemySpawned >= maxEnemySpawn then
-            if ticks > nextEnemyReload then
-                enemySpawned = 0
-                nextEnemySpawn = 0
-                enemyType = (enemyType + 1) % #enemies
-            end
-        else
-            local fn = enemies[enemyType + 1]
-            if ticks > nextEnemySpawn then
-                local x, y = fn(0)
-                table.insert(enemyList, {x=x, y=y, i=0, fn=fn, dead=false})
-                enemySpawned = enemySpawned + 1
-                nextEnemySpawn = ticks + 10
-                nextEnemyReload = ticks + 100
+        if #enemyList <= 6 then
+            -- spawn enemies
+            if enemySpawned >= maxEnemySpawn then
+                if ticks > nextEnemyReload then
+                    enemySpawned = 0
+                    nextEnemySpawn = 0
+                    enemyType = (enemyType + 1) % #enemies
+                end
+            else
+                local fn = enemies[enemyType + 1]
+                if ticks > nextEnemySpawn then
+                    local obj = {x=0, y=0, i=0, fn=fn, dead=false}
+                    local x, y = fn(obj, 0, 0, 0)
+                    obj.x = x
+                    obj.y = y
+                    table.insert(enemyList, obj)
+                    enemySpawned = enemySpawned + 1
+                    nextEnemySpawn = ticks + 10
+                    nextEnemyReload = ticks + 100
+                end
             end
         end
 
@@ -411,11 +421,11 @@ function tick()
             if v.y > 32 or v.dead == true then
                 table.insert(deadEnemies, v)
             else
-                v.x, v.y = v.fn(v.i)
+                v.x, v.y = v.fn(v, v.i, v.x, v.y)
             end
 
             -- check to see if we're touching the player
-            if math.sqrt(math.pow(v.x - playerX, 2) + math.pow(v.y - playerY, 2)) < 2 then
+            if math.sqrt(math.pow(v.x - playerX, 2) + math.pow(v.y - playerY, 2)) < 1 then
                 gameover()
             end
         end
