@@ -11,8 +11,8 @@ local logo = [[
 
 -- this isn't my best code... at all
 
-local enemies = require("lua.enemies")
-local font = require("lua.font")
+local enemies = require("enemies")
+local font = require("font")
 
 local canvas = love.graphics.newCanvas(32, 32)
 canvas:setFilter('nearest', 'nearest')
@@ -36,6 +36,7 @@ function drawString(str, offsetX, offsetY)
 end
 
 function printString(str, x, y)
+    str = tostring(str)
     for i = 1, str:len() do
         local char = str:sub(i, i)
         local id = tonumber(char)
@@ -57,6 +58,7 @@ local playerMass = 10
 local playerBullets = {}
 local nextStopAttack = 0
 local nextAttack = 0
+local score = 0
 
 -- misc particles
 local trail = {}
@@ -212,7 +214,8 @@ function draw()
             end
 
             -- draw enemies (EVIL!)
-            love.graphics.setColor(255, 255, 255, 255)
+            -- love.graphics.setColor(255, (math.cos(ticks/2) + 1) * 100, 0, 255)
+            love.graphics.setColor(255, 200, 0, 255)
             -- love.graphics.setBlendMode('subtractive')
             for k, v in pairs(enemyList) do
                 love.graphics.rectangle('fill', v.x, v.y, 1, 1)
@@ -222,8 +225,9 @@ function draw()
             love.graphics.setColor(255, 255, 255, 100)
             -- drawEnemy(enemies[3])
 
+            -- draw score
             love.graphics.setColor(255, 255, 255)
-            printString("185820", 1, 1)
+            printString(score, 1, 1)
         end
 
     love.graphics.setCanvas()
@@ -360,7 +364,8 @@ function tick()
         else
             local fn = enemies[enemyType + 1]
             if ticks > nextEnemySpawn then
-                table.insert(enemyList, {x=fn(0), y=0, fn=fn, dead=false})
+                local x, y = fn(0)
+                table.insert(enemyList, {x=x, y=y, i=0, fn=fn, dead=false})
                 enemySpawned = enemySpawned + 1
                 nextEnemySpawn = ticks + 10
                 nextEnemyReload = ticks + 100
@@ -375,6 +380,7 @@ function tick()
                 if math.floor(math.pow(v.x-_v.x, 2) + math.pow(v.y-_v.y, 2)) < 2 and _v.dead ~= true then
                     _v.dead = true
                     table.insert(deadBullets, v)
+                    score = score + 1
                     break
                 end
             end
@@ -401,12 +407,16 @@ function tick()
 
         -- manage enemies
         for k, v in pairs(enemyList) do
-            local speed = v.fn(0, 1)
-            v.y = v.y + speed
+            v.i = v.i + 1
             if v.y > 32 or v.dead == true then
                 table.insert(deadEnemies, v)
             else
-                v.x = v.fn(v.y)
+                v.x, v.y = v.fn(v.i)
+            end
+
+            -- check to see if we're touching the player
+            if math.sqrt(math.pow(v.x - playerX, 2) + math.pow(v.y - playerY, 2)) < 2 then
+                gameover()
             end
         end
 
@@ -436,6 +446,11 @@ function tick()
             v.y = v.y + 1
         end
     end
+end
+
+function gameover()
+    state = "menu"
+    menuTransition = 0
 end
 
 function love.keypressed(key, isrepeat)

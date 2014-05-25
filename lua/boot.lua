@@ -1,3 +1,3 @@
-require("lua.main")
+require("main")
 
 love.run()

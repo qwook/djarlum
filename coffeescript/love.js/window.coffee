@@ -4,14 +4,13 @@ class Window
   getDesktopDimensions: () =>
 
   getDimensions: () =>
+    [@graphics.canvas.width, @graphics.canvas.height]
 
   getDisplayCount: () =>
 
   getFullscreen: () =>
 
   getFullscreenModes: () =>
-
-  getHeight: () =>
 
   getIcon: () =>
 
@@ -21,7 +20,11 @@ class Window
 
   getTitle: () =>
 
+  getHeight: () =>
+    @graphics.canvas.height
+
   getWidth: () =>
+    @graphics.canvas.width
 
   hasFocus: () =>
 

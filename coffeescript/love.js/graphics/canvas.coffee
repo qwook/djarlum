@@ -66,7 +66,7 @@ class Canvas
     @context.textAlign = context.textAlign
     @context.textBaseline = context.textBaseline
 
-  setDimensions: (width, height) ->
+  setDimensions: (@width, @height) ->
     @element.setAttribute('width', width + "px")
     @element.setAttribute('height', height + "px")
 

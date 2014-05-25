@@ -7,11 +7,12 @@ class Graphics
     @default_canvas = @canvas
     @default_context = @context
     @default_font = new Font("Vera", 12)
+    @font = @default_font
 
     @setColor(255, 255, 255)
     @setBackgroundColor(0, 0, 0)
     @setFont(@default_font)
-    @context.textBaseline = "top"
+    @context.textBaseline = "bottom"
     # @context.imageSmoothingEnabled = false
 
   # DRAWING
@@ -67,12 +68,12 @@ class Graphics
       when "line" then @context.stroke()
 
   print: (text, x, y) =>
-    @context.fillText(text, x, y)
+    @context.fillText(text, x, y + @font.height)
 
   # TODO: word wrap? UGH
   printf: (text, x, y, limit, align = "left") =>
     @context.save()
-    @context.translate(x + limit / 2, y)
+    @context.translate(x + limit / 2, y + @font.height)
     switch align
       when "center" then @context.textAlign = "center"
       when "left" then @context.textAlign = "left"
@@ -127,6 +128,7 @@ class Graphics
       @context = canvas.context
 
   setFont: (font) =>
+    @font = font
     if font
       @context.font = font.html_code
     else

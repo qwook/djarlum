@@ -29,6 +29,9 @@ class Keyboard
       else
         return @isDown(others...)
 
+  setKeyRepeat: () ->
+    null
+
   # ## key names
   #
   # This object contains the names used for each key code. Notice that this is not a
