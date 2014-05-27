@@ -111,9 +111,9 @@ return {
     -- heart
     , [4] = function(self, i)
 
-        local enterLength = 100
+        local enterLength = 50
         local heartLength = 100
-        local exitLength = 100
+        local exitLength = 50
 
         local offset = self.variation
 

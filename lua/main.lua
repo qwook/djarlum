@@ -72,6 +72,7 @@ local nextEnemySpawn = 0
 local maxEnemySpawn = 3
 local enemySpawned = 0
 local nextEnemyReload = 0
+local enemyReloadTime = 100
 local enemyType = 0
 local variation = math.random(0, 32)
 
@@ -196,16 +197,16 @@ function draw()
             love.graphics.rectangle('fill', playerX, playerY, 1, 1)
 
             -- firing, draw muzzleflash
-            if (love.keyboard.isDown(" ")) then
-                local a = (math.cos(ticks)+1)/2*255
-                if a < 100 then a = 0 end
-                love.graphics.setColor(255, 255, 0, a*0.5)
-                love.graphics.rectangle('fill', playerX-1, playerY-1, 3, 1)
-                love.graphics.setColor(255, 255, 255, a)
-                love.graphics.rectangle('fill', playerX, playerY-1, 1, 1)
-                love.graphics.setColor(255, 255, 0, a*0.25)
-                love.graphics.circle('fill', playerX, playerY, 10, 20)
-            end
+            -- if (love.keyboard.isDown(" ")) then
+            --     local a = (math.cos(ticks)+1)/2*255
+            --     if a < 100 then a = 0 end
+            --     love.graphics.setColor(255, 255, 0, a*0.5)
+            --     love.graphics.rectangle('fill', playerX-1, playerY-1, 3, 1)
+            --     love.graphics.setColor(255, 255, 255, a)
+            --     love.graphics.rectangle('fill', playerX, playerY-1, 1, 1)
+            --     love.graphics.setColor(255, 255, 0, a*0.25)
+            --     love.graphics.circle('fill', playerX, playerY, 10, 20)
+            -- end
 
             -- draw bullet
             for k, v in pairs(playerBullets) do
@@ -391,7 +392,7 @@ function tick()
                     table.insert(enemyList, obj)
                     enemySpawned = enemySpawned + 1
                     nextEnemySpawn = ticks + 10
-                    nextEnemyReload = ticks + 100
+                    nextEnemyReload = ticks + enemyReloadTime
                 end
             end
         end
@@ -469,6 +470,12 @@ function tick()
         for k, v in pairs(starDust) do
             v.y = v.y + 1
         end
+
+        if ticks > 10000 then
+            enemyReloadTime = 50
+            maxEnemySpawn = 4
+        end
+        print(ticks)
     end
 end
 
