@@ -23,11 +23,13 @@ return {
         local speed = 0.05
         local quarterAngle = math.pi/2
 
+        local offsetX = self.variation
+
         local offset1 = 100
         local offset2Length = 100
         local offset2 = offset1 + offset2Length
 
-        local x2, y2 = math.cos(i*speed-quarterAngle)*radius + screenHalf, math.sin(i*speed-quarterAngle)*radius + screenHalf
+        local x2, y2 = math.cos(i*speed-quarterAngle)*radius + offsetX, math.sin(i*speed-quarterAngle)*radius + screenHalf
 
         if i > offset2 + offset2Length then
             return 33
@@ -35,18 +37,19 @@ return {
             local interval = i - offset2
             local p = interval / offset2Length
 
-            return lerp( x2, y2, 16, 33, p )
+            return lerp( x2, y2, offsetX, 33, p )
         elseif i > offset1 then
             return x2, y2
         else
             local interval = i
             local p = interval / offset1
 
-            return lerp( 16, 0, x2, y2, p )
+            return lerp( offsetX, 0, x2, y2, p )
         end
     end
     -- zig zag
-    , [1] = function (self, i)
+    , [2] = function (self, i)
+
         local screenHalf = 16
         local radius = 8
         local length = 100
@@ -54,17 +57,24 @@ return {
         local interval = i % length
         local p = interval / length
 
+        local offset = (self.variation / 32 * (32 - radius*2)) + radius
+
         local goal = math.floor(i / length) % 2
 
         if goal == 0 then
-            return lerp( screenHalf + -radius, i * speed, screenHalf + radius, i * speed, p )
+            return lerp( offset + -radius, i * speed, offset + radius, i * speed, p )
         else
-            return lerp( screenHalf + radius, i * speed, screenHalf + -radius, i * speed, p )
+            return lerp( offset + radius, i * speed, offset + -radius, i * speed, p )
         end
     end
     -- seeker
-    , [1] = function (self, i, x1, y1)
+    , [3] = function (self, i, x1, y1)
+
+        local offset = self.variation
+
         if i == 0 then
+            self.x = offset
+            x1 = offset
             self.vx = 0
             self.vy = 0
         end
@@ -99,37 +109,43 @@ return {
         return x1 + self.vx, y1 + self.vy
     end
     -- heart
-    , [1] = function(self, i)
-        local offset1 = 100
-        local offset2Length = 100
-        local offset2 = offset1 + offset2Length
+    , [4] = function(self, i)
 
-        local interval = (i - offset1) * 0.1
-        if i < offset1 then
-            interval = 0
-        elseif i > offset2 then
-            interval = math.pi
-        end
+        local enterLength = 100
+        local heartLength = 100
+        local exitLength = 100
 
-        local x = 16*math.pow(math.sin(interval), 3)
-        local y = 13*math.cos(interval) - 5*math.cos(2*interval) - 2*math.cos(3*interval) - math.cos(4*interval)
-        local x2, y2 = 16 + x*0.5, 16 - y*0.5
+        local offset = self.variation
 
+        if i < enterLength then
+            local p = i / enterLength
 
-        if i > offset2 + offset2Length then
-            return 33
-        elseif i > offset2 then
-            local interval = i - offset2
-            local p = interval / offset2Length
+            local x = 16*math.pow(math.sin(0), 3)
+            local y = 13*math.cos(0) - 5*math.cos(2*0) - 2*math.cos(3*0) - math.cos(4*0)
+            local x2, y2 = 16 + x*0.5 + offset - 16, 16 - y*0.5
 
-            return lerp( x2, y2, 16, 33, p * 2 )
-        elseif i > offset1 then
+            return lerp(offset, 0, x2, y2, p)
+        elseif i < enterLength + heartLength then
+            local p = (i - enterLength) / heartLength
+
+            local ang = p*math.pi*2
+            local x = 16*math.pow(math.sin(ang), 3)
+            local y = 13*math.cos(ang) - 5*math.cos(2*ang) - 2*math.cos(3*ang) - math.cos(4*ang)
+            local x2, y2 = 16 + x*0.5 + offset - 16, 16 - y*0.5
+
             return x2, y2
-        else
-            local interval = i
-            local p = interval / offset1
+        elseif i < enterLength + heartLength + exitLength then
+            local p = (i - enterLength - heartLength) / enterLength
 
-            return lerp( 16, 0, x2, y2, p * 2 )
+            local ang = 1*math.pi*2
+            local x = 16*math.pow(math.sin(ang), 3)
+            local y = 13*math.cos(ang) - 5*math.cos(2*ang) - 2*math.cos(3*ang) - math.cos(4*ang)
+            local x2, y2 = 16 + x*0.5 + offset - 16, 16 - y*0.5
+
+            return lerp(x2, y2, offset, 32, p)
+        else
+            return 0, 33
         end
+
     end
 }

@@ -1,12 +1,12 @@
 
 local logo = [[
-  ########################################################
+############################################################
 ##      ####    ####  ####    ####  ####  ##  ##  ######  ##
 ##        ##    ##      ##      ##  ####  ##  ##    ##    ##
 ##  ####  ####  ##  ##  ##  ##  ##  ####  ##  ##          ##
 ##  ####  ####  ##      ##    ####    ##      ##  ####    ##
 ##        ##    ##  ##  ##  ##  ##    ##      ##  ####    ##
-  ########################################################
+############################################################
 ]]
 
 -- this isn't my best code... at all
@@ -73,6 +73,7 @@ local maxEnemySpawn = 3
 local enemySpawned = 0
 local nextEnemyReload = 0
 local enemyType = 0
+local variation = math.random(0, 32)
 
 local deadEnemies = {}
 local deadBullets = {}
@@ -106,6 +107,7 @@ function startGame()
     playerBullets = {}
     nextStopAttack = 0
     nextAttack = 0
+    score = 0
 
     -- misc particles
     trail = {}
@@ -119,6 +121,7 @@ function startGame()
     enemySpawned = 0
     nextEnemyReload = 0
     enemyType = 0
+    variation = math.random(0, 32)
 end
 
 function love.load()
@@ -166,6 +169,7 @@ function draw()
                 drawString(logo, 1, 4)
             end
         elseif state == "game" then
+            -- draw trail
             for i, v in pairs(trail) do
                 local col =  i * 4
                 love.graphics.setColor(col, col, col)
@@ -174,7 +178,7 @@ function draw()
                 local b = ((math.cos(ticks/100)+1)/2) * ((math.cos(ticks/100)+1)/2) * 255
                 love.graphics.setColor(col, col, col)
                 love.graphics.setColor((r + i*4)*0.25, (g + i*4)*0.25, (b + i*4)*0.25)
-                love.graphics.setColor((r + i*4), (g + i*4), (b + i*4))
+                love.graphics.setColor(math.min(r + i*4, 255), math.min(g + i*4, 255), math.min(b + i*4, 255))
                 love.graphics.circle('fill', v.x, v.y, (#trail-i+1)*6, (#trail-i+1)*12)
             end
 
@@ -219,8 +223,8 @@ function draw()
             end
 
             -- draw enemies (EVIL!)
-            -- love.graphics.setColor(255, (math.cos(ticks/2) + 1) * 100, 0, 255)
-            love.graphics.setColor(255, 200, 0, 255)
+            love.graphics.setColor(255, (math.cos(ticks/2) + 1) * 100, 0, 255)
+            -- love.graphics.setColor(255, 200, 0, 255)
             -- love.graphics.setBlendMode('subtractive')
             for k, v in pairs(enemyList) do
                 love.graphics.rectangle('fill', v.x, v.y, 1, 1)
@@ -231,6 +235,15 @@ function draw()
             -- drawEnemy(enemies[3])
 
             -- draw score
+            love.graphics.setColor(0, 0, 0, 10)
+            -- printString(score, 0, 0)
+            -- printString(score, 2, 2)
+            -- printString(score, 0, 2)
+            -- printString(score, 2, 0)
+            printString(score, 1, 2)
+            printString(score, 2, 1)
+            printString(score, 1, 0)
+            printString(score, 0, 1)
             love.graphics.setColor(255, 255, 255)
             printString(score, 1, 1)
         end
@@ -366,11 +379,12 @@ function tick()
                     enemySpawned = 0
                     nextEnemySpawn = 0
                     enemyType = (enemyType + 1) % #enemies
+                    variation = math.random(0, 32)
                 end
             else
                 local fn = enemies[enemyType + 1]
                 if ticks > nextEnemySpawn then
-                    local obj = {x=0, y=0, i=0, fn=fn, dead=false}
+                    local obj = {x=0, y=0, i=0, fn=fn, variation = variation, dead=false}
                     local x, y = fn(obj, 0, 0, 0)
                     obj.x = x
                     obj.y = y

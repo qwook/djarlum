@@ -15,6 +15,8 @@ class Graphics
     @context.textBaseline = "bottom"
     # @context.imageSmoothingEnabled = false
 
+    @saved = false
+
   # DRAWING
   arc: (mode, x, y, radius, startAngle, endAngle, segments) =>
     @context.beginPath()
@@ -163,6 +165,21 @@ class Graphics
   getHeight: () =>
     @default_canvas.height
 
+  setScissor: (x, y, width, height) =>
+
+    if !x? and @saved
+      @context.restore()
+      @saved = false
+      return
+
+    if !@saved
+      @context.save()
+      @saved = true
+
+    @context.beginPath()
+    @context.rect(x, y, width, height)
+    @context.clip()
+
   # PRIVATE
   drawDrawable = (drawable, x = 0, y = 0, r = 0, sx = 1, sy = sx, ox = 0, oy = 0, kx = 0, ky = 0) ->
     halfWidth = drawable.element.width / 2
@@ -189,4 +206,5 @@ class Graphics
     @context.translate(-ox, -oy)
     @context.drawImage(drawable.element, quad.x, quad.y, quad.width, quad.height, 0, 0, quad.width, quad.height)
     @context.restore()
+
 
