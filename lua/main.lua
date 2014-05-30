@@ -47,6 +47,9 @@ end
 local ticks = 0
 local state = "menu"
 
+local timelapse = 0
+local dead = -1
+
 -- player stuff
 local lastPlayerX = 0
 local lastPlayerY = 0
@@ -97,6 +100,9 @@ end
 function startGame()
     state = "game"
 
+    timelapse = 0
+    dead = -1
+
     -- player stuff
     lastPlayerX = 0
     lastPlayerY = 0
@@ -135,6 +141,10 @@ function love.draw()
     love.graphics.draw(canvas, 0, 0, 0, scrH/32, scrH/32)
 end
 
+local function lerp (a, b, t)
+        return a + (b - a) * t
+end
+
 function draw()
     love.graphics.setCanvas(canvas)
         love.graphics.clear()
@@ -171,16 +181,33 @@ function draw()
             end
         elseif state == "game" then
             -- draw trail
-            for i, v in pairs(trail) do
-                local col =  i * 4
-                love.graphics.setColor(col, col, col)
-                local r = (math.cos(ticks/100)+1)/2*255
-                local g = (math.sin(ticks/100)+1)/2*255
-                local b = ((math.cos(ticks/100)+1)/2) * ((math.cos(ticks/100)+1)/2) * 255
-                love.graphics.setColor(col, col, col)
-                love.graphics.setColor((r + i*4)*0.25, (g + i*4)*0.25, (b + i*4)*0.25)
-                love.graphics.setColor(math.min(r + i*4, 255), math.min(g + i*4, 255), math.min(b + i*4, 255))
-                love.graphics.circle('fill', v.x, v.y, (#trail-i+1)*6, (#trail-i+1)*12)
+            if dead > -1 then
+                for i, v in pairs(trail) do
+                    local r = (math.cos(ticks/100)+1)/2*255
+                    local g = (math.sin(ticks/100)+1)/2*255
+                    local b = ((math.cos(ticks/100)+1)/2) * ((math.cos(ticks/100)+1)/2) * 255
+                    r = math.min(r + i*25 - 100, 255)
+                    g = math.min(g + i*25 - 100, 255)
+                    b = math.min(b + i*25 - 100, 255)
+                    r = math.min(255, r + dead*4)
+                    g = math.max(0, g - dead*4)
+                    b = math.max(0, b - dead*4)
+                    love.graphics.setColor(r, g, b)
+                    local timeoffset = (ticks / 10 % 6) - 6
+                    love.graphics.circle('fill', v.x, v.y, (#trail-i+1)*6+timeoffset, (#trail-i+1)*12+timeoffset)
+                end
+            else
+                for i, v in pairs(trail) do
+                    local r = (math.cos(ticks/100)+1)/2*255
+                    local g = (math.sin(ticks/100)+1)/2*255
+                    local b = ((math.cos(ticks/100)+1)/2) * ((math.cos(ticks/100)+1)/2) * 255
+                    r = math.min(r + i*25 - 100, 255)
+                    g = math.min(g + i*25 - 100, 255)
+                    b = math.min(b + i*25 - 100, 255)
+                    love.graphics.setColor(r, g, b)
+                    local timeoffset = (ticks / 10 % 6) - 6
+                    love.graphics.circle('fill', v.x, v.y, (#trail-i+1)*6+timeoffset, (#trail-i+1)*12+timeoffset)
+                end
             end
 
             -- draw fucking stars
@@ -191,9 +218,14 @@ function draw()
                 love.graphics.rectangle('fill', v.x, v.y, 1, 1)
             end
 
+            -- draw player
             love.graphics.setColor(255, 255, 255, 10)
             love.graphics.rectangle('fill', lastPlayerX, lastPlayerY, 1, 1)
-            love.graphics.setColor(255, 255, 255)
+            -- love.graphics.setColor(255, 255, 255)
+            local r = (math.cos(ticks/100)+1)/2*255
+            local g = (math.sin(ticks/100)+1)/2*255
+            local b = ((math.cos(ticks/100)+1)/2) * ((math.cos(ticks/100)+1)/2) * 255
+            love.graphics.setColor(255 - math.min(r + #trail*25 - 100, 255), 255 - math.min(g + #trail*25 - 100, 255), 255 - math.min(b + #trail*25 - 100, 255))
             love.graphics.rectangle('fill', playerX, playerY, 1, 1)
 
             -- firing, draw muzzleflash
@@ -295,6 +327,9 @@ function tick()
             startGame()
         end
     elseif state == "game" then
+
+        timelapse = timelapse + 1
+
         local forceX = 0
         local forceY = 0
         local velocity = math.sqrt(playerVelX*playerVelX+playerVelY*playerVelY)
@@ -368,12 +403,12 @@ function tick()
         -- shoot
         if (love.keyboard.isDown(" ")) then
             if ticks > nextAttack then
-                table.insert(playerBullets, {x=playerX, y=playerY, id=ticks})
-                nextAttack = ticks + 10
+                table.insert(playerBullets, {x=playerX, y=playerY-1, id=ticks})
+                nextAttack = ticks + 15
             end
         end
 
-        if #enemyList <= 6 then
+        -- if #enemyList <= 6 then
             -- spawn enemies
             if enemySpawned >= maxEnemySpawn then
                 if ticks > nextEnemyReload then
@@ -395,7 +430,7 @@ function tick()
                     nextEnemyReload = ticks + enemyReloadTime
                 end
             end
-        end
+        -- end
 
         -- manage bullets
         for k, v in pairs(playerBullets) do
@@ -471,17 +506,24 @@ function tick()
             v.y = v.y + 1
         end
 
-        if ticks > 10000 then
-            enemyReloadTime = 50
-            maxEnemySpawn = 4
+        if timelapse % 1000 == 0 then
+            enemyReloadTime = math.min( 25, 100 - math.pow(timelapse/1000, 3) )
+            maxEnemySpawn = math.max( 6, math.floor(3 + timelapse/1000) )
         end
-        print(ticks)
+    end
+
+    if dead > -1 then
+        print(dead)
+        dead = dead + 1
     end
 end
 
 function gameover()
-    state = "menu"
-    menuTransition = 0
+    -- state = "menu"
+    -- menuTransition = 0
+    if dead == -1 then
+        dead = 0
+    end
 end
 
 function love.keypressed(key, isrepeat)
