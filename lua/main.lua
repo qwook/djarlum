@@ -12,6 +12,7 @@ local logo = [[
 -- this isn't my best code... at all
 
 local enemies = require("enemies")
+local gameovertext = require("gameover")
 local font = require("font")
 
 local canvas = love.graphics.newCanvas(32, 32)
@@ -181,6 +182,7 @@ function draw()
             end
         elseif state == "game" then
             -- draw trail
+            -- when dead
             if dead > -1 then
                 for i, v in pairs(trail) do
                     local r = (math.cos(ticks/100)+1)/2*255
@@ -193,9 +195,16 @@ function draw()
                     g = math.max(0, g - dead*4)
                     b = math.max(0, b - dead*4)
                     love.graphics.setColor(r, g, b)
+
+                    local red = #trail - math.floor(dead / 10)
+                    if i > red then
+                        love.graphics.setColor(255, 0, 0)
+                    end
+
                     local timeoffset = (ticks / 10 % 6) - 6
                     love.graphics.circle('fill', v.x, v.y, (#trail-i+1)*6+timeoffset, (#trail-i+1)*12+timeoffset)
                 end
+            -- when alive
             else
                 for i, v in pairs(trail) do
                     local r = (math.cos(ticks/100)+1)/2*255
@@ -279,6 +288,11 @@ function draw()
             printString(score, 0, 1)
             love.graphics.setColor(255, 255, 255)
             printString(score, 1, 1)
+
+            if dead > -1 and (math.floor(ticks/30) % 2 == 0) then
+                love.graphics.setColor(0, 0, 0)
+                drawString(gameovertext, 0, 13)
+            end
         end
 
     love.graphics.setCanvas()
@@ -337,15 +351,17 @@ function tick()
             velocity = 0
         end
 
-        if (love.keyboard.isDown("left")) then
-            forceX = forceX - 1
-        elseif (love.keyboard.isDown("right")) then
-            forceX = forceX + 1
-        end
-        if (love.keyboard.isDown("up")) then
-            forceY = forceY - 1
-        elseif (love.keyboard.isDown("down")) then
-            forceY = forceY + 1
+        if dead == -1 then
+            if (love.keyboard.isDown("left")) then
+                forceX = forceX - 1
+            elseif (love.keyboard.isDown("right")) then
+                forceX = forceX + 1
+            end
+            if (love.keyboard.isDown("up")) then
+                forceY = forceY - 1
+            elseif (love.keyboard.isDown("down")) then
+                forceY = forceY + 1
+            end
         end
 
         local force = math.sqrt(forceX*forceX+forceY*forceY)
@@ -512,10 +528,17 @@ function tick()
         end
     end
 
-    if dead > -1 then
-        print(dead)
+    if state == "game" and dead > -1 then
         dead = dead + 1
+
+        -- restart game
+        if (not lastSpace and love.keyboard.isDown(" ")) then
+            state = "menu"
+            menuTransition = 0.01
+        end
     end
+
+    lastSpace = love.keyboard.isDown(" ")
 end
 
 function gameover()
