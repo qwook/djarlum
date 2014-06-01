@@ -99,7 +99,7 @@ function initialize()
 end
 
 function startGame()
-    state = "game"
+    state = "menu"
 
     timelapse = 0
     dead = -1
